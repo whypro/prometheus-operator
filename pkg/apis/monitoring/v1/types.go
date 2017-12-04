@@ -230,6 +230,8 @@ type PrometheusSpec struct {
 	Thanos *ThanosSpec `json:"thanos,omitempty"`
 	// Priority class assigned to the Pods
 	PriorityClassName string `json:"priorityClassName,omitempty"`
+	// If specified, the pod hostNetwork is enabled
+	HostNetwork bool `json:"hostNetwork,omitempty"`
 }
 
 // PrometheusStatus is the most recent observed status of the Prometheus cluster. Read-only. Not
@@ -735,6 +737,8 @@ type AlertmanagerSpec struct {
 	PriorityClassName string `json:"priorityClassName,omitempty"`
 	// AdditionalPeers allows injecting a set of additional Alertmanagers to peer with to form a highly available cluster.
 	AdditionalPeers []string `json:"additionalPeers,omitempty"`
+	// If specified, the pod's hostNetwork will be true
+	HostNetwork bool `json:"hostNetwork,omitempty"`
 }
 
 // AlertmanagerList is a list of Alertmanagers.
