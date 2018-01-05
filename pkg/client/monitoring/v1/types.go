@@ -124,6 +124,8 @@ type PrometheusSpec struct {
 	SecurityContext *v1.PodSecurityContext
 	// If specified, the pod hostNetwork is enabled
 	HostNetwork bool `json:"hostNetwork,omitempty"`
+ 	// If specified, the prometheus -storage.local.chunk-encoding-version is set as this value
+	ChunkEncodingVersion int32 `json:"chuckEncodingVersion,omitempty"`
 }
 
 // Most recent observed status of the Prometheus cluster. Read-only. Not
