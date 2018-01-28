@@ -126,6 +126,9 @@ type PrometheusSpec struct {
 	HostNetwork bool `json:"hostNetwork,omitempty"`
  	// If specified, the prometheus -storage.local.chunk-encoding-version is set as this value
 	ChunkEncodingVersion int32 `json:"chuckEncodingVersion,omitempty"`
+	// If specified, set target-heap-size = requests.memory * targetHeapSizeRate, else set the rate to 1/2
+	// The valid value is in range (0, 1)
+	TargetHeapSizeRate string `json:"targetHeapSizeRate,omitempty"`
 }
 
 // Most recent observed status of the Prometheus cluster. Read-only. Not
