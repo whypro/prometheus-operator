@@ -323,6 +323,10 @@ func generateServiceMonitorConfig(version semver.Version, m *v1.ServiceMonitor, 
 	// Relabel namespace and pod and service labels into proper labels.
 	relabelings = append(relabelings, []yaml.MapSlice{
 		yaml.MapSlice{
+			{Key: "source_labels", Value: []string{"__meta_kubernetes_node_name"}},
+			{Key: "target_label", Value: "node"},
+		},
+		yaml.MapSlice{
 			{Key: "source_labels", Value: []string{"__meta_kubernetes_namespace"}},
 			{Key: "target_label", Value: "namespace"},
 		},
