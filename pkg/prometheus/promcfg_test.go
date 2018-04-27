@@ -96,6 +96,7 @@ func generateTestConfig(version string) ([]byte, error) {
 		makeServiceMonitors(),
 		1,
 		map[string]BasicAuthCredentials{},
+		nil,
 	)
 }
 

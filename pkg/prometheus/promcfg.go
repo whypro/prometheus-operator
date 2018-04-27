@@ -56,7 +56,7 @@ func stringMapToMapSlice(m map[string]string) yaml.MapSlice {
 	return res
 }
 
-func generateConfig(p *v1.Prometheus, mons map[string]*v1.ServiceMonitor, ruleConfigMaps int, basicAuthSecrets map[string]BasicAuthCredentials) ([]byte, error) {
+func generateConfig(p *v1.Prometheus, mons map[string]*v1.ServiceMonitor, ruleConfigMaps int, basicAuthSecrets map[string]BasicAuthCredentials, additionalScrapeConfigs []byte) ([]byte, error) {
 	versionStr := p.Spec.Version
 	if versionStr == "" {
 		versionStr = DefaultVersion
@@ -120,9 +120,15 @@ func generateConfig(p *v1.Prometheus, mons map[string]*v1.ServiceMonitor, ruleCo
 		alertmanagerConfigs = append(alertmanagerConfigs, generateAlertmanagerConfig(version, am))
 	}
 
+	var additionalScrapeConfigsYaml []yaml.MapSlice
+	err = yaml.Unmarshal([]byte(additionalScrapeConfigs), &additionalScrapeConfigsYaml)
+	if err != nil {
+		errors.Wrap(err, "unmarshalling additional scrape configs failed")
+	}
+
 	cfg = append(cfg, yaml.MapItem{
 		Key:   "scrape_configs",
-		Value: scrapeConfigs,
+		Value: append(scrapeConfigs, additionalScrapeConfigsYaml...),
 	})
 
 	cfg = append(cfg, yaml.MapItem{

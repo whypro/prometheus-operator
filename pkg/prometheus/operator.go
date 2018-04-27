@@ -873,8 +873,23 @@ func (c *Operator) destroyPrometheus(key string) error {
 	return nil
 }
 
-func (c *Operator) loadBasicAuthSecrets(mons map[string]*monitoringv1.ServiceMonitor, s *v1.SecretList) (map[string]BasicAuthCredentials, error) {
+func loadAdditionalScrapeConfigsSecret(additionalScrapeConfigs *v1.SecretKeySelector, s *v1.SecretList) ([]byte, error) {
+	if additionalScrapeConfigs != nil {
+		for _, secret := range s.Items {
+			if secret.Name == additionalScrapeConfigs.Name {
+				if c, ok := secret.Data[additionalScrapeConfigs.Key]; ok {
+					return c, nil
+				}
 
+				return nil, fmt.Errorf("key %v could not be found in Secret %v.", additionalScrapeConfigs.Key, additionalScrapeConfigs.Name)
+			}
+		}
+		return nil, fmt.Errorf("secret %v could not be found.", additionalScrapeConfigs.Name)
+	}
+	return nil, nil
+}
+
+func (c *Operator) loadBasicAuthSecrets(mons map[string]*monitoringv1.ServiceMonitor, s *v1.SecretList) (map[string]BasicAuthCredentials, error) {
 	secrets := map[string]BasicAuthCredentials{}
 
 	for _, mon := range mons {
@@ -949,8 +964,13 @@ func (c *Operator) createConfig(p *monitoringv1.Prometheus, ruleFileConfigMaps [
 		return err
 	}
 
+	additionalScrapeConfigs, err := loadAdditionalScrapeConfigsSecret(p.Spec.AdditionalScrapeConfigs, listSecrets)
+	if err != nil {
+		return errors.Wrap(err, "loading additional scrape configs from Secret failed")
+	}
+
 	// Update secret based on the most recent configuration.
-	conf, err := generateConfig(p, smons, len(ruleFileConfigMaps), basicAuthSecrets)
+	conf, err := generateConfig(p, smons, len(ruleFileConfigMaps), basicAuthSecrets, additionalScrapeConfigs)
 	if err != nil {
 		return errors.Wrap(err, "generating config failed")
 	}
