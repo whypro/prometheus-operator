@@ -141,6 +141,11 @@ type PrometheusSpec struct {
 	// notes to ensure that no incompatible scrape configs are going to break
 	// Prometheus after the upgrade.
 	AdditionalScrapeConfigs *v1.SecretKeySelector `json:"additionalScrapeConfigs,omitempty"`
+	// APIServerConfig allows specifying a host and auth methods to access apiserver.
+	// If left empty, Prometheus is assumed to run inside of the cluster
+	// and will discover API servers automatically and use the pod's CA certificate
+	// and bearer token file at /var/run/secrets/kubernetes.io/serviceaccount/.
+	APIServerConfig *APIServerConfig `json:"apiserverConfig,omitempty"`
 }
 
 // Most recent observed status of the Prometheus cluster. Read-only. Not
@@ -248,6 +253,23 @@ type RelabelConfig struct {
 	Replacement string `json:"replacement"`
 	// Action to perform based on regex matching. Default is 'replace'
 	Action string `json:"action,omitempty"`
+}
+
+// APIServerConfig defines a host and auth methods to access apiserver.
+// More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
+// +k8s:openapi-gen=true
+type APIServerConfig struct {
+	// Host of apiserver.
+	// A valid string consisting of a hostname or IP followed by an optional port number
+	Host string `json:"host"`
+	// BasicAuth allow an endpoint to authenticate over basic authentication
+	BasicAuth *BasicAuth `json:"basicAuth,omitempty"`
+	// Bearer token for accessing apiserver.
+	BearerToken string `json:"bearerToken,omitempty"`
+	// File to read bearer token for accessing apiserver.
+	BearerTokenFile string `json:"bearerTokenFile,omitempty"`
+	// TLS Config to use for accessing apiserver.
+	TLSConfig *TLSConfig `json:"tlsConfig,omitempty"`
 }
 
 // AlertmanagerEndpoints defines a selection of a single Endpoints object

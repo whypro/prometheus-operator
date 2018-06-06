@@ -18,12 +18,14 @@ import (
 	"bytes"
 	"testing"
 
+	"gopkg.in/yaml.v2"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
+
 )
 
 func TestConfigGeneration(t *testing.T) {
@@ -42,6 +44,84 @@ func TestConfigGeneration(t *testing.T) {
 			if !bytes.Equal(cfg, testcfg) {
 				t.Fatalf("Config generation is not deterministic.\n\n\nFirst generation: \n\n%s\n\nDifferent generation: \n\n%s\n\n", string(cfg), string(testcfg))
 			}
+		}
+	}
+}
+
+func TestK8SSDConfigGeneration(t *testing.T) {
+	sm := &monitoringv1.ServiceMonitor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "testservicemonitor1",
+			Namespace: "default",
+			Labels: map[string]string{
+				"group": "group1",
+			},
+		},
+		Spec: monitoringv1.ServiceMonitorSpec{
+			NamespaceSelector: monitoringv1.NamespaceSelector{
+				MatchNames: []string{"test"},
+			},
+		},
+	}
+
+	testcases := []struct {
+		apiserverConfig  *monitoringv1.APIServerConfig
+		basicAuthSecrets map[string]BasicAuthCredentials
+		expected         string
+	}{
+		{
+			nil,
+			nil,
+			`kubernetes_sd_configs:
+- role: endpoints
+  namespaces:
+    names:
+    - test
+`,
+		},
+		{
+			&monitoringv1.APIServerConfig{
+				Host:            "example.com",
+				BasicAuth:       &monitoringv1.BasicAuth{},
+				BearerToken:     "bearer_token",
+				BearerTokenFile: "bearer_token_file",
+				TLSConfig:       nil,
+			},
+			map[string]BasicAuthCredentials{
+				"apiserver": {
+					"foo",
+					"bar",
+				},
+			},
+			`kubernetes_sd_configs:
+- role: endpoints
+  namespaces:
+    names:
+    - test
+  api_server: example.com
+  basic_auth:
+    username: foo
+    password: bar
+  bearer_token: bearer_token
+  bearer_token_file: bearer_token_file
+`,
+		},
+	}
+
+	for _, tc := range testcases {
+		c := generateK8SSDConfig(
+			getNamespacesFromServiceMonitor(sm),
+			tc.apiserverConfig,
+			tc.basicAuthSecrets,
+		)
+		s, err := yaml.Marshal(yaml.MapSlice{c})
+		if err != nil {
+			t.Fatal(err)
+		}
+		result := string(s)
+
+		if result != tc.expected {
+			t.Fatalf("Unexpected result.\n\nGot:\n\n%s\n\nExpected:\n\n%s\n\n", result, tc.expected)
 		}
 	}
 }
