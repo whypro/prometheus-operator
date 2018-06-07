@@ -96,6 +96,8 @@ type PrometheusSpec struct {
 	Storage *StorageSpec `json:"storage,omitempty"`
 	// A selector to select which ConfigMaps to mount for loading rule files from.
 	RuleSelector *metav1.LabelSelector `json:"ruleSelector,omitempty"`
+	// Namespaces to be selected for rule discovery. If nil, only check own namespace.
+	RuleNamespaceSelector *metav1.LabelSelector `json:"ruleNamespaceSelector,omitempty"`
 	// Define details regarding alerting.
 	Alerting AlertingSpec `json:"alerting,omitempty"`
 	// Define resources requests and limits for single Pods.

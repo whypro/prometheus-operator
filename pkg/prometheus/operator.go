@@ -742,12 +742,28 @@ func (c *Operator) ruleFileConfigMaps(p *monitoringv1.Prometheus) ([]*v1.ConfigM
 		return nil, err
 	}
 
-	cache.ListAllByNamespace(c.cmapInf.GetIndexer(), p.Namespace, ruleSelector, func(obj interface{}) {
-		_, ok := c.keyFunc(obj)
-		if ok {
-			res = append(res, obj.(*v1.ConfigMap))
+	namespaces := []string{}
+
+	if p.Spec.RuleNamespaceSelector == nil {
+		namespaces = append(namespaces, p.Namespace)
+	} else {
+		ruleNSSelector, err := metav1.LabelSelectorAsSelector(p.Spec.RuleNamespaceSelector)
+		if err != nil {
+			return nil, err
 		}
-	})
+		cache.ListAll(c.nsInf.GetStore(), ruleNSSelector, func(obj interface{}) {
+			namespaces = append(namespaces, obj.(*v1.Namespace).Name)
+		})
+	}
+
+	for _, ns := range namespaces {
+		cache.ListAllByNamespace(c.cmapInf.GetIndexer(), ns, ruleSelector, func(obj interface{}) {
+			_, ok := c.keyFunc(obj)
+			if ok {
+				res = append(res, obj.(*v1.ConfigMap))
+			}
+		})
+	}
 
 	return res, nil
 }
