@@ -318,13 +318,6 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMaps []
 
 	var promArgs []string
 	var securityContext *v1.PodSecurityContext
-	var chunkEncodingVersion int32
-
-	if p.Spec.ChunkEncodingVersion != 0 {
-		chunkEncodingVersion = p.Spec.ChunkEncodingVersion
-	} else {
-		chunkEncodingVersion = 1
-	}
 
 	switch version.Major {
 	case 1:
@@ -332,7 +325,7 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMaps []
 			"-storage.local.retention="+p.Spec.Retention,
 			"-storage.local.num-fingerprint-mutexes=4096",
 			fmt.Sprintf("-storage.local.path=%s", prometheusStorageDir),
-			fmt.Sprintf("-storage.local.chunk-encoding-version=%d", chunkEncodingVersion),
+			"-storage.local.chunk-encoding-version=2",
 			fmt.Sprintf("-config.file=%s", prometheusConfFile))
 		// We attempt to specify decent storage tuning flags based on how much the
 		// requested memory can fit. The user has to specify an appropriate buffering
