@@ -21,7 +21,6 @@ import (
 	"net/url"
 	"path"
 	"sort"
-	"strconv"
 	"strings"
 
 	"k8s.io/api/apps/v1beta1"
@@ -354,16 +353,9 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMaps []
 				"-storage.local.max-chunks-to-persist="+fmt.Sprintf("%d", memChunks/2),
 			)
 		} else {
-			var targetHeapSize int64
-			targetHeapSizeRate, err := strconv.ParseFloat(p.Spec.TargetHeapSizeRate, 64)
-			if err != nil || targetHeapSizeRate <= 0 || targetHeapSizeRate >= 1 {
-				// Leave 1/3 head room for other overhead.
-				targetHeapSize = reqMem.Value()/3*2
-			} else {
-				targetHeapSize = int64(float64(reqMem.Value()) * targetHeapSizeRate)
-			}
+			// Leave 1/3 head room for other overhead.
 			promArgs = append(promArgs,
-				"-storage.local.target-heap-size="+fmt.Sprintf("%d", targetHeapSize),
+				"-storage.local.target-heap-size="+fmt.Sprintf("%d", reqMem.Value()/3*2),
 			)
 		}
 
