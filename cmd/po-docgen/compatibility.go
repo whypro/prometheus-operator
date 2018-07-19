@@ -21,7 +21,7 @@ import (
 )
 
 func printCompatMatrixDocs() {
-	fmt.Println(`<br>
+	fmt.Print(`<br>
 <div class="alert alert-info" role="alert">
     <i class="fa fa-exclamation-triangle"></i><b> Note:</b> Starting with v0.12.0, Prometheus Operator requires use of Kubernetes v1.7.x and up.
 </div>
