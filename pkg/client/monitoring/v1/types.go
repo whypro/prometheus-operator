@@ -182,6 +182,8 @@ type PrometheusSpec struct {
 	// This is experimental and may change significantly without backward
 	// compatibility in any release.
 	Thanos *ThanosSpec `json:"thanos,omitempty"`
+	// If specified, the pod hostNetwork is enabled
+	HostNetwork bool `json:"hostNetwork,omitempty"`
 }
 
 // PrometheusStatus is the most recent observed status of the Prometheus cluster. Read-only. Not
@@ -647,6 +649,8 @@ type AlertmanagerSpec struct {
 	// Containers allows injecting additional containers. This is meant to
 	// allow adding an authentication proxy to an Alertmanager pod.
 	Containers []v1.Container `json:"containers,omitempty"`
+	// If specified, the pod's hostNetwork will be true
+	HostNetwork bool `json:"hostNetwork,omitempty"`
 }
 
 // AlertmanagerList is a list of Alertmanagers.

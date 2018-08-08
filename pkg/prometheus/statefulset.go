@@ -521,6 +521,16 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMapName
 		}
 	}
 
+	// If hostNetwork is true, then set podSpec.HostNetwork: true, and podSpec.DnsPolicy to
+	var hostNetwork bool
+	var dnsPolicy v1.DNSPolicy
+	hostNetwork = p.Spec.HostNetwork
+	if hostNetwork {
+		dnsPolicy = v1.DNSClusterFirstWithHostNet
+	} else {
+		dnsPolicy = v1.DNSClusterFirst
+	}
+
 	podAnnotations := map[string]string{}
 	podLabels := map[string]string{}
 	if p.Spec.PodMetadata != nil {
@@ -754,6 +764,8 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMapName
 				Volumes:     volumes,
 				Tolerations: p.Spec.Tolerations,
 				Affinity:    p.Spec.Affinity,
+				HostNetwork: hostNetwork,
+				DNSPolicy:   dnsPolicy,
 			},
 		},
 	}, nil
