@@ -1522,6 +1522,9 @@ spec:
                 under. This is necessary to generate correct URLs. This is necessary
                 if Prometheus is not served from root of a DNS name.
               type: string
+            hostNetwork:
+              description: If specified, the pod hostNetwork is enabled
+              type: boolean
             imagePullSecrets:
               description: An optional list of references to secrets in the same namespace
                 to use for pulling prometheus and alertmanager images from registries

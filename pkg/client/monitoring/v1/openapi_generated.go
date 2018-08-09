@@ -699,6 +699,13 @@ func schema_pkg_client_monitoring_v1_AlertmanagerSpec(ref common.ReferenceCallba
 							},
 						},
 					},
+					"hostNetwork": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod's hostNetwork will be true",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -874,6 +881,19 @@ func schema_pkg_client_monitoring_v1_Endpoint(ref common.ReferenceCallback) comm
 						SchemaProps: spec.SchemaProps{
 							Description: "BasicAuth allow an endpoint to authenticate over basic authentication More info: https://prometheus.io/docs/operating/configuration/#endpoints",
 							Ref:         ref("github.com/coreos/prometheus-operator/pkg/client/monitoring/v1.BasicAuth"),
+						},
+					},
+					"relabelings": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RelabelConfigs to apply before scraping. More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#<relabel_config>",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/coreos/prometheus-operator/pkg/client/monitoring/v1.RelabelConfig"),
+									},
+								},
+							},
 						},
 					},
 					"metricRelabelings": {
@@ -1429,6 +1449,13 @@ func schema_pkg_client_monitoring_v1_PrometheusSpec(ref common.ReferenceCallback
 						SchemaProps: spec.SchemaProps{
 							Description: "Thanos configuration allows configuring various aspects of a Prometheus server in a Thanos environment.\n\nThis section is experimental, it may change significantly without deprecation notice in any release.\n\nThis is experimental and may change significantly without backward compatibility in any release.",
 							Ref:         ref("github.com/coreos/prometheus-operator/pkg/client/monitoring/v1.ThanosSpec"),
+						},
+					},
+					"hostNetwork": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod hostNetwork is enabled",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},
