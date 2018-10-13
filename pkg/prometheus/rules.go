@@ -51,6 +51,16 @@ func (c *Operator) createOrUpdateRuleConfigMaps(p *monitoringv1.Prometheus) ([]s
 		return nil, err
 	}
 
+	cmRules, err := c.selectConfigMapRules(p, namespaces)
+	if err != nil {
+		return nil, err
+	}
+
+	// merge cmRules and prometheusRules
+	for k, v := range cmRules {
+		newRules[k] = v
+	}
+
 	currentConfigMapList, err := cClient.List(prometheusRulesConfigMapSelector(p.Name))
 	if err != nil {
 		return nil, err
@@ -157,6 +167,49 @@ func (c *Operator) selectRuleNamespaces(p *monitoringv1.Prometheus) ([]string, e
 	)
 
 	return namespaces, nil
+}
+
+func (c *Operator) selectConfigMapRules(p *monitoringv1.Prometheus, namespaces []string) (map[string]string, error) {
+	rules := map[string]string{}
+	rulesKey := "rules.yaml"
+
+	ruleSelector, err := metav1.LabelSelectorAsSelector(p.Spec.RuleSelector)
+	if err != nil {
+		return rules, errors.Wrap(err, "convert rule label selector to selector")
+	}
+
+	for _, ns := range namespaces {
+		var cmError error
+		err := cache.ListAllByNamespace(c.cmapInf.GetIndexer(), ns, ruleSelector, func(obj interface{}) {
+			cm := obj.(*v1.ConfigMap)
+			content, exists := cm.Data[rulesKey]
+			if !exists {
+				cmError = errors.Errorf("configmap %s/%s key %s is not exists", cm.Namespace, cm.Name, rulesKey)
+				return
+			}
+			rules[fmt.Sprintf("%v-%v.yaml", cm.Namespace, cm.Name)] = string(content)
+		})
+		if err != nil {
+			return nil, err
+		}
+		if cmError != nil {
+			return nil, cmError
+		}
+	}
+
+	ruleNames := []string{}
+	for name := range rules {
+		ruleNames = append(ruleNames, name)
+	}
+
+	level.Debug(c.logger).Log(
+		"msg", "selected ConfigMap Rules",
+		"rules", strings.Join(ruleNames, ","),
+		"namespace", p.Namespace,
+		"prometheus", p.Name,
+	)
+
+	return rules, nil
 }
 
 func (c *Operator) selectRules(p *monitoringv1.Prometheus, namespaces []string) (map[string]string, error) {
