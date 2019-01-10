@@ -662,7 +662,7 @@ func TestHostNetwork(t *testing.T) {
 		Spec: monitoringv1.PrometheusSpec{
 			HostNetwork: true,
 		},
-	}, "", defaultTestConfig, nil, "")
+	}, defaultTestConfig, nil, "")
 
 	require.NoError(t, err)
 
