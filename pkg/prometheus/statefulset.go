@@ -607,7 +607,7 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMapName
 			Resources: v1.ResourceRequirements{
 				Limits: v1.ResourceList{
 					v1.ResourceCPU:    resource.MustParse("25m"),
-					v1.ResourceMemory: resource.MustParse("10Mi"),
+					v1.ResourceMemory: resource.MustParse("50Mi"),
 				},
 			},
 		}
@@ -829,7 +829,7 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *Config, ruleConfigMapName
 						Resources: v1.ResourceRequirements{
 							Limits: v1.ResourceList{
 								v1.ResourceCPU:    resource.MustParse("50m"),
-								v1.ResourceMemory: resource.MustParse("50Mi"),
+								v1.ResourceMemory: resource.MustParse("100Mi"),
 							},
 						},
 					},
