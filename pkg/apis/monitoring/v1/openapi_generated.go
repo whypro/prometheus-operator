@@ -752,6 +752,13 @@ func schema_pkg_apis_monitoring_v1_AlertmanagerSpec(ref common.ReferenceCallback
 							},
 						},
 					},
+					"hostNetwork": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod's hostNetwork will be true",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -1541,6 +1548,13 @@ func schema_pkg_apis_monitoring_v1_PrometheusSpec(ref common.ReferenceCallback) 
 						SchemaProps: spec.SchemaProps{
 							Description: "Priority class assigned to the Pods",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"hostNetwork": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod hostNetwork is enabled",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},

@@ -264,6 +264,16 @@ func makeStatefulSetSpec(a *monitoringv1.Alertmanager, config Config) (*appsv1.S
 		}
 	}
 
+	// If hostNetwork is true, then set podSpec.HostNetwork: true, and podSpec.DnsPolicy to
+	var hostNetwork bool
+	var dnsPolicy v1.DNSPolicy
+	hostNetwork = a.Spec.HostNetwork
+	if hostNetwork {
+		dnsPolicy = v1.DNSClusterFirstWithHostNet
+	} else {
+		dnsPolicy = v1.DNSClusterFirst
+	}
+
 	podAnnotations := map[string]string{}
 	podLabels := map[string]string{}
 	if a.Spec.PodMetadata != nil {
@@ -473,6 +483,8 @@ func makeStatefulSetSpec(a *monitoringv1.Alertmanager, config Config) (*appsv1.S
 				SecurityContext:    securityContext,
 				Tolerations:        a.Spec.Tolerations,
 				Affinity:           a.Spec.Affinity,
+				HostNetwork:        hostNetwork,
+				DNSPolicy:          dnsPolicy,
 			},
 		},
 	}, nil
